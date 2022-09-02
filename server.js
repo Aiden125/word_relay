@@ -234,9 +234,9 @@ io.on('connection', function(socket){
     console.log('유저 웹소켓 접속 됨')
 
     // 채팅방 입장(방만들고 유저 넣기)
-    socket.on('joinroom1', function(data){
-        socket.join('room1')
-        console.log('유저 채팅방에 입장 됨')
+    socket.on('joinroom', function(data){
+        socket.join('room'+data)
+        console.log('유저 room'+data+'채팅방에 입장 됨')
     });
     
     // 유저가 보내는 메시지 받기(room1)

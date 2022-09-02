@@ -22,7 +22,8 @@
       <h4 class="ml-2 my-3 text-center">웹소켓 채팅방</h4>
 
       <input id="input1" onkeyup="enterkey()">
-      <button id="room1">채팅방1 입장</button>
+      <input id="roomname">
+      <button id="joinroom">채팅방만들기 혹은 입장</button>
       
       <button id="leaveroom1">채팅방1 나가기</button>
       <div id="content"></div>
@@ -33,8 +34,8 @@
         var socket = io();
         
         // 채팅방에 입장시키기
-        $('#room1').click(function(){
-            socket.emit('joinroom1', '채팅방1 입장시켜줘')
+        $('#joinroom').click(function(){
+            socket.emit('joinroom', $('#roomname').val())
         });
 
         // 내가 속한곳에 메시지 보내기
