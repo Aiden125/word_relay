@@ -9,7 +9,7 @@ app.use(bodyParser.urlencoded({extended : true}));
 
 // mongoDB 사용을 위한 변수
 const MongoClient = require('mongodb').MongoClient;
-const { ObjectId } = require('mongodb'); // objectId 쓰기위함
+const { ObjectId, Double } = require('mongodb'); // objectId 쓰기위함
 
 // method-override 사용선언
 const methodOverride = require('method-override')
@@ -50,12 +50,46 @@ app.get('/', function(request, response){
     response.render("index.ejs")
 });
 
+// 채팅방 list보여주기
+app.get('/list', function(request, response){
+    db.collection('post').find().toArray(function(error, result){
+        response.render('list.ejs', { posts : result } );
+    });
+});
+
+
+//  검색
+app.get('/search', (request, response) => {
+    var 검색조건 = [
+        {
+            $search: {
+                index: 'titleSearch',
+                text: {
+                    query: request.query.value,
+                    path: "title" // 여러개 원하면 ['제목', '날짜']
+                }
+            }
+        },
+        // score는 검색의 점수이고 이 순서대로 정렬해줌, 1로 입력한 값은 보여주고 0인 값은 안보여줌
+        // { $project : { 제목 : 1, _id: 0, score : { $meta: "searchScore" } } }
+
+        // { $sort : { _id : 1 } }, // 결과 정렬하기
+        // { $limit : 10 } // 10개만 가져와
+    ]
+    console.log(request.query.value); // 요청 파라미터 잡아주는것 key를 잡아주는 거라고 생각하면 됨
+    db.collection('post').aggregate(검색조건).toArray((error, result)=>{
+        console.log(result)
+        response.render('search.ejs', {posts : result} )
+    })
+})
+
 
 
 // 패스포트, 세션 적용 준비
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const session = require('express-session');
+const { response } = require('express');
 
 // app.use = 미들웨어를 쓰겠다
 // 미들웨어 = 요청-응답 중간에 뭔가 실행되는 코드
@@ -141,6 +175,46 @@ app.post('/register', function(request, response){
     });
 });
 
+
+
+// 채팅방 만들기 처리
+app.post('/write', 로그인했니, function(request, response){
+    
+    // DB에 채팅방 발행하기
+    db.collection('post_counter').findOne({name : "게시물갯수"}, function(error, result){
+        console.log(result.total)
+        var totalPost = result.total;
+        var 저장할거 = {_id : totalPost + 1, 작성자 : request.user._id, 제목 : request.body.title, 날짜 : new Date()}
+        
+        db.collection('post').insertOne(저장할거, function(error, result){
+            console.log('저장완료');
+            
+            // post_counter 1 증가
+            db.collection('post_counter').updateOne({name : '게시물갯수'}, { $inc : {total:1} }, function(error, result){
+                if(error) { return console.log(error) }
+            });
+        });
+    });
+    setTimeout(() => response.redirect('/list'), 300);
+});
+
+
+
+
+// 삭제 처리
+app.delete('/delete', 로그인했니, function(request, response){
+    console.log(request.body);
+    request.body._id = parseInt(request.body._id);
+
+    var 삭제할데이터 = { _id : request.body._id}
+
+    // request.body에 담겨온 게시물 번호를 가진 글 지워줘
+    db.collection('post').deleteOne(삭제할데이터, function(error, result){
+        console.log('삭제성공')
+        if(error) { console.log(error) }
+        response.status(200).send( { message : '성공' } );
+    });
+});
 
 
 
