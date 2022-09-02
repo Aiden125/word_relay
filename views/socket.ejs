@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="/public/main.css">
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js" ></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.1/socket.io.js" integrity="sha512-9mpsATI0KClwt+xVZfbcf2lJ8IFBAwsubJ6mI3rtULwyM3fBmQFzj0It4tGqxLOGQwGfJdk/G+fANnxfq9/cew==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <title>Hello, world!</title>
   </head>
   <body>
@@ -19,41 +19,47 @@
     <%- include('nav.html') %>
 
     <div class="container mt-4">
-      <h4 class="ml-2 my-3 text-center">서버에서 가져온 할일 리스트</h4>
+      <h4 class="ml-2 my-3 text-center">웹소켓 채팅방</h4>
 
-      <div class="container input-group mb-2">
-        <input class="form-control" id="search-input">
-        <button class="input-group-append btn btn-danger" id="search">검색</button>
-      </div>
+      <input id="input1" onkeyup="enterkey()">
+      <button id="room1">채팅방1 입장</button>
+      
+      <button id="leaveroom1">채팅방1 나가기</button>
+      <div id="content"></div>
 
-      <script>
-        $('#search').click(function(){
-          var search_input = $('#search-input').val()
-          window.location.replace('/search?value='+search_input) // url을 갈아치워줘(=get 요청)
-        })
+    </div>
 
+    <script>
+        var socket = io();
+        
+        // 채팅방에 입장시키기
+        $('#room1').click(function(){
+            socket.emit('joinroom1', '채팅방1 입장시켜줘')
+        });
 
-        // 이런 방식도 존재
-        // var 자료 = { 이름 : '값', 이름2 : '값2'}
-        // $.param(자료)
+        // 내가 속한곳에 메시지 보내기
+        function enterkey() {
+            if (window.event.keyCode == 13) {
+                // 엔터키가 눌렸을 때
+                socket.emit('room1-send', $('#input1').val()) // 작명, 보낼메시지
+                $('#input1').val(''); // 입력하면 비워주기
+            }
+        }
 
-        // $(폼태그).serialize()
-      </script>
+        // $('#room1-send').click(function(){
+        //     socket.emit('room1-send', $('#input1').val()) // 작명, 보낼메시지
+        // });
 
+        // 유저가 서버에게 메시지 받기
+        socket.on('broadcast', function(data){
+            $('#content').append('<div>' + data + '</div>')
+        });
 
-
-
-      <ul class="list-group">      
-        <% for(var i=0; i<posts.length; i++){ %>
-        <li class="list-group-item">
-          <p>글번호 : <%= posts[i]._id %></a></p>        
-          <h4><a href="/detail/<%= posts[i]._id%>">할일 제목 : <%= posts[i].제목 %></a></h4>
-          <p>할일 마감날짜 : <%= posts[i].날짜 %></p>
-          <button class="delete btn btn-danger" data-id="<%= posts[i]._id %>">삭제</button>
-        </li>
-        <% } %>
-      </ul>
-  </div>
+        // 채팅방에 입장시키기
+        $('#leaveroom1').click(function(){
+            socket.emit('leaveroom1', '채팅방 내보내줘')
+        });
+    </script>
 
 
 

@@ -3,6 +3,11 @@
 const express = require('express'); // 설치한 라이브러리 첨부해
 const app = express(); // 새로운 객체 만들어
 
+// socket.io 셋팅
+const http = require('http').createServer(app);
+const {Server} = require('socket.io');
+const io = new Server(http);
+
 // body-parser 사용선언
 const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({extended : true}));
@@ -34,11 +39,12 @@ MongoClient.connect(process.env.DB_URL, { useUnifiedTopology: true }, function(�
     // });
 
     // 서버로 어디로 열지(서버포트, 뭐할지)
-    app.listen(8081, function(){
+    http.listen(8081, function(){
         console.log('listening on 8081')
     });
 
 });
+
 
 
 
@@ -217,6 +223,37 @@ app.delete('/delete', 로그인했니, function(request, response){
 });
 
 
+// 웹소켓 페이지로 보내주기
+app.get('/socket', function(request, response){
+    response.render('socket.ejs')
+});
 
 
+// 누가 웹소켓에 접속하면 내부 코드 실행해줘
+io.on('connection', function(socket){
+    console.log('유저 웹소켓 접속 됨')
+
+    // 채팅방 입장(방만들고 유저 넣기)
+    socket.on('joinroom1', function(data){
+        socket.join('room1')
+        console.log('유저 채팅방에 입장 됨')
+    });
+    
+    // 유저가 보내는 메시지 받기(room1)
+    socket.on('room1-send', function(data){
+        io.to('room1').emit('broadcast', data)
+    });
+
+    // 유저가 보내는 개인톡 받기
+    socket.on('user-send', function(data){
+        io.to(socket.id).emit('broadcast', data) 
+    });
+    
+    // 채팅방 퇴장(방만들고 유저 넣기)
+    socket.on('leaveroom1', function(data){
+        socket.leave('room1')
+        console.log('유저 채팅방 퇴장')
+    });
+
+});
 
