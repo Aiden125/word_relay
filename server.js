@@ -56,13 +56,6 @@ app.get('/', function(request, response){
     response.render("index.ejs")
 });
 
-// 채팅방 list보여주기
-app.get('/list', function(request, response){
-    db.collection('post').find().toArray(function(error, result){
-        response.render('list.ejs', { posts : result } );
-    });
-});
-
 
 //  검색
 app.get('/search', (request, response) => {
@@ -240,7 +233,7 @@ io.on('connection', function(socket){
     // 채팅방 입장(방만들고 유저 넣기)
     socket.on('joinroom', function(data){
         socket.join(data)
-        console.log('유저 채팅방'+data+'에 입장 됨')
+        console.log('유저 채팅방 '+data+'에 입장 됨')
         roomno = data;
     });
     
@@ -258,7 +251,7 @@ io.on('connection', function(socket){
     // 채팅방 퇴장(방만들고 유저 넣기)
     socket.on('leaveroom', function(data){
         socket.leave(roomno)
-        console.log('유저'+roomno+'채팅방 퇴장')
+        console.log('유저 '+roomno+'채팅방 퇴장')
         // ++ 리스트 페이지로 보내주기 명령
     });
 
