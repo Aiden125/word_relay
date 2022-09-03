@@ -195,9 +195,20 @@ app.post('/write', 로그인했니, function(request, response){
             });
         });
     });
-    setTimeout(() => response.post('/socket'), 300);
+    setTimeout(() => response.redirect('/socket'), 300);
 
 });
+
+
+// 웹소켓 페이지로 보내주기
+app.get('/socket', function(request, response){
+    db.collection('post').find().toArray(function(error, result){
+        response.render('socket.ejs', { posts : result } );
+    });
+});
+
+
+
 
 
 
