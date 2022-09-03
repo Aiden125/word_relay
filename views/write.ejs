@@ -14,14 +14,79 @@
     <%- include('nav.html') %>
 
     <div class="container mt-4">
-        <form action="/write" method="POST">
-            <div class="form-group">
-                <label for="formControlRange">제목</label>
-                <input type="text" class="form-control-range" name="id" >
-            </div>
-            <button type="submit" class="btn btn-danger">채팅방 만들기</button>
+      <h4 class="ml-2 my-3 text-center">채팅방 목록</h4>
+
+      <div class="container input-group mb-2">
+        <input class="form-control" id="search-input">
+        <button class="input-group-append btn btn-danger" id="search">검색</button>
+      </div>
+
+      <form action="/write" method="POST">
+        <div class="container input-group mb-2">
+          <input type="text" class="form-control" name="title" id="title">
+          <input type="submit" class="input-group-append btn btn-danger" id="write" value="방만들기">
+        </div>
+      </form>
+
+      <!-- <script>
+        $('#write').click(function(){
+          var write_title = $('#write_title').val();
+          if(write_title == null){
+            alert('채팅방 제목을 입력해주세요');
+            return false;
+          }
+        })
+      </script> -->
+
+
+      <ul class="list-group">      
+        <% for(var i=0; i<posts.length; i++){ %>
+        <li class="list-group-item">       
+          <h4><a href="/socket">할일 제목 : <%= posts[i].제목 %></a></h4>
+          <button class="delete btn btn-danger" data-id="<%= posts[i]._id %>">삭제</button>
+          <button class="chat btn btn-danger" data-id="<%= posts[i].작성자 %>">채팅하기</button> <!-- data-id에 작성자 숨겨 보내기 -->
+        </li>
+        <% } %>
+      </ul>
+    </div>
+
+
+    
+
+
+    <script>
+      // DELETE 요청하기
+      $('.delete').click(function(e){
+        var 글번호 = e.target.dataset.id;
+        var 지금누른거 = $(this);
+
+        $.ajax({
+          method : 'DELETE',
+          url : '/delete',
+          data : {_id : 글번호},
+        }).done(function(result){
+          console.log('성공');
+          지금누른거.parent('li').fadeOut();
+        }).fail(function(xhr, textStatus, errorThrown){
+          console.log(xhr, textStatus, errorThrown);
+        });
+      });
+
+    </script>
+
+    
+
+    <div class="container mt-4">
+      <form action="wirte" method="POST">
+        <div class="form-group">
+            <label for="formControlRange">제목</label>
+            <input type="text" class="form-control-range" name="id">
+        </div>
+        <button type="submit" class="btn btn-danger">채팅방 만들기</button>
       </form>
     </div>
+    
+
 
 
     <!-- Optional JavaScript; choose one of the two! -->

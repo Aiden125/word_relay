@@ -19,26 +19,20 @@
     <%- include('nav.html') %>
 
     <div class="container mt-4">
-      <h4 class="ml-2 my-3 text-center">웹소켓 채팅방</h4>
+      <h4 class="ml-2 my-3 text-center">실제 채팅방</h4>
 
       <input id="input1" onkeyup="enterkey()">
-      <input id="roomname">
-      <button id="joinroom">채팅방만들기 혹은 입장</button>
-      
-      <button id="leaveroom1">채팅방1 나가기</button>
+      <button id="leaveroom">채팅방 나가기</button>
       <div id="content"></div>
 
     </div>
-    
-
-
 
     <script>
         var socket = io();
         
         // 채팅방에 입장시키기
         $('#joinroom').click(function(){
-          socket.emit('joinroom', $('#roomname').val())
+            socket.emit('joinroom', $('#roomname').val())
         });
 
         // 내가 속한곳에 메시지 보내기
@@ -62,10 +56,9 @@
         // 채팅방에 퇴장시키기
         $('#leaveroom').click(function(){
             socket.emit('leaveroom', '채팅방 내보내줘')
-            window.location.replace('/list') // url을 갈아치워줘(=get 요청)
+            window.location.replace('/socket') // url을 갈아치워줘(=get 요청)
         });
     </script>
-
 
 
 

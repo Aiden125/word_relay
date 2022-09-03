@@ -32,7 +32,7 @@ var db;
 MongoClient.connect(process.env.DB_URL, { useUnifiedTopology: true }, function(에러, client){ // DB 커넥팅이 완료되면 서버 띄워
     if(에러) return console.log(에러) // 에러 뜨면 원인 콘솔에 띄우기
 
-    db = client.db('speed_word'); // todoapp이라는 폴더(database)에 연결해
+    db = client.db('speed_word'); // speed_word라는 폴더(database)에 연결해
 
     // db.collection('post').insertOne( {이름 : 'john', _id : 20} , function(에러, 결과){
     //     console.log('저장완료');
@@ -185,6 +185,7 @@ app.post('/register', function(request, response){
 
 // 채팅방 만들기 처리
 app.post('/write', 로그인했니, function(request, response){
+    var title = request.body.title;
     
     // DB에 채팅방 발행하기
     db.collection('post_counter').findOne({name : "게시물갯수"}, function(error, result){
@@ -201,7 +202,8 @@ app.post('/write', 로그인했니, function(request, response){
             });
         });
     });
-    setTimeout(() => response.redirect('/list'), 300);
+    setTimeout(() => response.post('/socket'), 300);
+
 });
 
 
@@ -228,20 +230,22 @@ app.get('/socket', function(request, response){
     response.render('socket.ejs')
 });
 
-
 // 누가 웹소켓에 접속하면 내부 코드 실행해줘
 io.on('connection', function(socket){
     console.log('유저 웹소켓 접속 됨')
+    var roomname = "";
 
     // 채팅방 입장(방만들고 유저 넣기)
     socket.on('joinroom', function(data){
-        socket.join('room'+data)
-        console.log('유저 room'+data+'채팅방에 입장 됨')
+        socket.join(data)
+        console.log('유저 채팅방'+data+'에 입장 됨')
+        roomname = data;
     });
     
     // 유저가 보내는 메시지 받기(room1)
-    socket.on('room1-send', function(data){
-        io.to('room1').emit('broadcast', data)
+    socket.on('room-send', function(data){
+        io.to(roomname).emit('broadcast', data)
+        console.log(roomname+'채팅방에 메시지 전송 성공')
     });
 
     // 유저가 보내는 개인톡 받기
@@ -250,10 +254,15 @@ io.on('connection', function(socket){
     });
     
     // 채팅방 퇴장(방만들고 유저 넣기)
-    socket.on('leaveroom1', function(data){
-        socket.leave('room1')
-        console.log('유저 채팅방 퇴장')
+    socket.on('leaveroom', function(data){
+        socket.leave(roomname)
+        console.log('유저'+roomname+'채팅방 퇴장')
+        // ++ 리스트 페이지로 보내주기 명령
     });
 
 });
 
+
+app.get('/chatroom', function(request, response){
+    response.render('chatroom.ejs')
+});
