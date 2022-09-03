@@ -227,25 +227,27 @@ app.delete('/delete', 로그인했니, function(request, response){
 
 // 웹소켓 페이지로 보내주기
 app.get('/socket', function(request, response){
-    response.render('socket.ejs')
+    db.collection('post').find().toArray(function(error, result){
+        response.render('socket.ejs', { posts : result } );
+    });
 });
 
 // 누가 웹소켓에 접속하면 내부 코드 실행해줘
 io.on('connection', function(socket){
     console.log('유저 웹소켓 접속 됨')
-    var roomname = "";
+    var roomno = ""; // 방 번호
 
     // 채팅방 입장(방만들고 유저 넣기)
     socket.on('joinroom', function(data){
         socket.join(data)
         console.log('유저 채팅방'+data+'에 입장 됨')
-        roomname = data;
+        roomno = data;
     });
     
     // 유저가 보내는 메시지 받기(room1)
     socket.on('room-send', function(data){
-        io.to(roomname).emit('broadcast', data)
-        console.log(roomname+'채팅방에 메시지 전송 성공')
+        io.to(roomno).emit('broadcast', data)
+        console.log('채팅방'+roomno+'에 메시지 전송 성공')
     });
 
     // 유저가 보내는 개인톡 받기
@@ -255,8 +257,8 @@ io.on('connection', function(socket){
     
     // 채팅방 퇴장(방만들고 유저 넣기)
     socket.on('leaveroom', function(data){
-        socket.leave(roomname)
-        console.log('유저'+roomname+'채팅방 퇴장')
+        socket.leave(roomno)
+        console.log('유저'+roomno+'채팅방 퇴장')
         // ++ 리스트 페이지로 보내주기 명령
     });
 

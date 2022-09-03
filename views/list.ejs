@@ -44,9 +44,9 @@
       <ul class="list-group">      
         <% for(var i=0; i<posts.length; i++){ %>
         <li class="list-group-item">       
-          <h4><a href="/socket">할일 제목 : <%= posts[i].제목 %></a></h4>
+          <h4>할일 제목 : <%= posts[i].제목 %></h4>
           <button class="delete btn btn-danger" data-id="<%= posts[i]._id %>">삭제</button>
-          <button class="chat btn btn-danger" data-id="<%= posts[i].작성자 %>">채팅하기</button> <!-- data-id에 작성자 숨겨 보내기 -->
+          <button class="joinroom btn btn-danger" data-id="<%= posts[i].제목 %>">채팅하기</button> <!-- data-id에 작성자 숨겨 보내기 -->
         </li>
         <% } %>
       </ul>
@@ -78,9 +78,39 @@
 
 
       var socket = io();
+        
+        // 채팅방에 입장시키기
+        $('#joinroom').click(function(){
+          var roomname = e.target.dataset.id;
+          socket.emit('joinroom', roomname)
+        });
+
+        // 내가 속한곳에 메시지 보내기
+        function enterkey() {
+            if (window.event.keyCode == 13) {
+                // 엔터키가 눌렸을 때
+                socket.emit('room-send', $('#input1').val()) // 작명, 보낼메시지
+                $('#input1').val(''); // 입력하면 비워주기
+              }
+        }
+
+        // $('#room1-send').click(function(){
+        //     socket.emit('room1-send', $('#input1').val()) // 작명, 보낼메시지
+        // });
+
+        // 유저가 서버에게 메시지 받기
+        socket.on('broadcast', function(data){
+            $('#content').append('<div>' + data + '</div>')
+        });
+
+        // 채팅방에 퇴장시키기
+        $('#leaveroom').click(function(){
+            socket.emit('leaveroom', '채팅방 내보내줘')
+            window.location.replace('/list') // url을 갈아치워줘(=get 요청)
+        });
     </script>
   
-  
+
     <!-- Optional JavaScript; choose one of the two! -->
 
     <!-- Option 1: jQuery and Bootstrap Bundle (includes Popper) -->

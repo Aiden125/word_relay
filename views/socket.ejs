@@ -18,35 +18,65 @@
 
     <%- include('nav.html') %>
 
-    <div class="container mt-4">
+    <div class="container mt-4" style="text-align:center">
       <h4 class="ml-2 my-3 text-center">웹소켓 채팅방</h4>
 
-      <input id="input1" onkeyup="enterkey()">
-      <input id="roomname">
-      <button id="joinroom">채팅방만들기 혹은 입장</button>
-      
-      <button id="leaveroom1">채팅방1 나가기</button>
+      <input id="message" onkeyup="enterkey()">
+      <button id="leaveroom">채팅방 나가기</button>
       <div id="content"></div>
 
     </div>
-    
 
+
+
+    <div class="container mt-4">
+      <h4 class="ml-2 my-3 text-center">채팅방 목록</h4>
+
+      <form action="/write" method="POST">
+        <div class="container input-group mb-2">
+          <input type="text" class="form-control" name="title" id="title">
+          <input type="submit" class="input-group-append btn btn-danger" id="write" value="방만들기">
+        </div>
+      </form>
+
+      <!-- <script>
+        $('#write').click(function(){
+          var write_title = $('#write_title').val();
+          if(write_title == null){
+            alert('채팅방 제목을 입력해주세요');
+            return false;
+          }
+        })
+      </script> -->
+
+      <ul class="list-group">      
+        <% for(var i=0; i<posts.length; i++){ %>
+        <li class="list-group-item">
+          <h4>채팅방 이름 : <%= posts[i].제목 %> 채팅방 번호 : <%= posts[i]._id %></h4>
+          <button class="delete btn btn-danger" data-id="<%= posts[i]._id %>">삭제</button>
+          <button class="joinroom btn btn-danger" data-id="<%= posts[i].제목 %>">채팅방 입장</button> <!-- data-id에 작성자 숨겨 보내기 -->
+        </li>
+        <% } %>
+      </ul>
+    </div>
 
 
     <script>
         var socket = io();
-        
+        var roomno = "";
+
         // 채팅방에 입장시키기
-        $('#joinroom').click(function(){
-          socket.emit('joinroom', $('#roomname').val())
+        $('.joinroom').click(function(e){
+          roomno = e.target.dataset.id;
+          socket.emit('joinroom', roomno)
         });
 
         // 내가 속한곳에 메시지 보내기
         function enterkey() {
             if (window.event.keyCode == 13) {
                 // 엔터키가 눌렸을 때
-                socket.emit('room-send', $('#input1').val()) // 작명, 보낼메시지
-                $('#input1').val(''); // 입력하면 비워주기
+                socket.emit('room-send', $('#message').val()) // 작명, 보낼메시지
+                $('#message').val(''); // 입력하면 비워주기
               }
         }
 
@@ -59,10 +89,9 @@
             $('#content').append('<div>' + data + '</div>')
         });
 
-        // 채팅방에 퇴장시키기
+        // 채팅방 퇴장하기
         $('#leaveroom').click(function(){
-            socket.emit('leaveroom', '채팅방 내보내줘')
-            window.location.replace('/list') // url을 갈아치워줘(=get 요청)
+            socket.emit('leaveroom', roomno)
         });
     </script>
 
