@@ -62,64 +62,34 @@
 
 
     <script>
-        var socket = io();
-        var roomno = "";
+      // 방 입장시키기
+      $('.joinroom').click(function(e){
+        roomno = e.target.dataset.id;
+        window.location.replace('/chatroom/'+roomno) // url을 갈아치워줘(=get 요청)
+      });
 
-        // 채팅방에 입장시키기
-        $('.joinroom').click(function(e){
-          roomno = e.target.dataset.id;
-          
-          window.location.replace('/chatroom/number='+roomno) // url을 갈아치워줘(=get 요청)
-          socket.emit('joinroom', roomno)
+      // 삭제 요청하기
+      $('.delete').click(function(e){ // 클래스가 delte인걸 클릭할 때만 실행해줘
+        // 내가 누른 버튼에 숨겨진 data-id 값을 가져와줘
+        var 글번호 = e.target.dataset.id; // 지금 클릭 한 것
+        var 지금누른거 = $(this); // 지금 이벤트가 동작하는 곳(누른 버튼)
+
+
+        $.ajax({
+        method : 'DELETE', // delete 요청할거야
+        url : '/delete', // delete경로로
+        data : {_id : 글번호}, // 보낼데이터(ex: 게시물 번호)
+        }).done(function(result){ // 요청이 성공하면 이걸 실행해줘
+          // 페이지를 강제로 새로고침해주세요
+
+          // 삭제버튼을 누른 <li> 요소를 제거해주세요/안보이게
+          console.log('성공했다!'); // 브라우저 콘솔 창에(F12 쪽)
+          지금누른거.parent('li').fadeOut();
+
+        }).fail(function(xhr, textStatus, errorThrown){// 요청이 실패했을 때 실행해줘
+          console.log(xhr, textStatus, errorThrown);
         });
-
-        // 내가 속한 곳에 메시지 보내기
-        function enterkey() {
-            if (window.event.keyCode == 13) {
-                // 엔터키가 눌렸을 때
-                socket.emit('room-send', $('#message').val()) // 작명, 보낼메시지
-                $('#message').val(''); // 입력하면 비워주기
-              }
-        }
-
-        // $('#room1-send').click(function(){
-        //     socket.emit('room1-send', $('#input1').val()) // 작명, 보낼메시지
-        // });
-
-        // 유저가 서버에게 메시지 받기
-        socket.on('broadcast', function(data){
-            $('#content').append('<div>' + data + '</div>')
-        });
-
-        // 채팅방 퇴장하기
-        $('#leaveroom').click(function(){
-            socket.emit('leaveroom', roomno)
-        });
-
-
-        // 삭제 요청하기
-        $('.delete').click(function(e){ // 클래스가 delte인걸 클릭할 때만 실행해줘
-          // 내가 누른 버튼에 숨겨진 data-id 값을 가져와줘
-          var 글번호 = e.target.dataset.id; // 지금 클릭 한 것
-          var 지금누른거 = $(this); // 지금 이벤트가 동작하는 곳(누른 버튼)
-
-
-          $.ajax({
-          method : 'DELETE', // delete 요청할거야
-          url : '/delete', // delete경로로
-          data : {_id : 글번호}, // 보낼데이터(ex: 게시물 번호)
-          }).done(function(result){ // 요청이 성공하면 이걸 실행해줘
-            // 페이지를 강제로 새로고침해주세요
-
-            // 삭제버튼을 누른 <li> 요소를 제거해주세요/안보이게
-            console.log('성공했다!'); // 브라우저 콘솔 창에(F12 쪽)
-            지금누른거.parent('li').fadeOut();
-
-          }).fail(function(xhr, textStatus, errorThrown){// 요청이 실패했을 때 실행해줘
-            console.log(xhr, textStatus, errorThrown);
-          });
-        })
-
+      })
 
     </script>
 

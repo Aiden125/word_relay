@@ -269,6 +269,7 @@ io.on('connection', function(socket){
 });
 
 
-app.get('/chatroom', function(request, response){
-    response.render('chatroom.ejs')
+app.get('/chatroom/:roomno', function(request, response){
+    console.log(request.params.roomno)
+    response.render('chatroom.ejs', {roomno : request.params.roomno} )
 });
