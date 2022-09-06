@@ -23,7 +23,8 @@
 
       <input id="message" onkeyup="enterkey()">
       <button id="joinroom" data-id="<%=roomno%>">시작하기</button>
-      <button id="leaveroom">채팅방 나가기</button>
+      <button id="leaveroom1">채팅방 나가기</button>
+      <button id="leaveroom2" style="display:none">채팅방 나가기</button>
       <div id="content"></div>
 
     </div>
@@ -35,6 +36,8 @@
         $('#joinroom').click(function(e){
           roomno = e.target.dataset.id;
           socket.emit('joinroom', roomno)
+          $("#leaveroom1").hide();
+          $("#leaveroom2").show();
         });
 
         // 내가 속한 곳에 메시지 보내기
@@ -56,9 +59,15 @@
         });
 
         // 채팅방 퇴장하기
-        $('#leaveroom').click(function(){
-            socket.emit('leaveroom', roomno)
-            window.location.replace('/socket')
+        $('#leaveroom1').click(function(){
+          window.location.replace('/socket')
+          socket.emit('leaveroom', roomno)
+        });
+
+        // 채팅방 퇴장하기
+        $('#leaveroom2').click(function(){
+          socket.emit('leaveroom', roomno)
+          window.location.replace('/socket')
         });
 
   </script>

@@ -210,9 +210,6 @@ app.get('/socket', function(request, response){
 
 
 
-
-
-
 // 삭제 처리
 app.delete('/delete', 로그인했니, function(request, response){
     console.log(request.body);
@@ -236,10 +233,13 @@ app.get('/socket', function(request, response){
     });
 });
 
+
 // 누가 웹소켓에 접속하면 내부 코드 실행해줘
 io.on('connection', function(socket){
     console.log('유저 웹소켓 접속 됨')
     var roomno = ""; // 방 번호
+
+
 
     // 채팅방 입장(방만들고 유저 넣기)
     socket.on('joinroom', function(data){
