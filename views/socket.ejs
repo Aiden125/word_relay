@@ -68,6 +68,8 @@
         // 채팅방에 입장시키기
         $('.joinroom').click(function(e){
           roomno = e.target.dataset.id;
+          
+          window.location.replace('/chatroom/number='+roomno) // url을 갈아치워줘(=get 요청)
           socket.emit('joinroom', roomno)
         });
 
